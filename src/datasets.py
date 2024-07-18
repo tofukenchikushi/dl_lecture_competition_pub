@@ -13,12 +13,12 @@ class ThingsMEGDataset(torch.utils.data.Dataset):
         self.split = split
         self.num_classes = 1854
         
-        self.X = torch.load(os.path.join(data_dir, f"{split}_X.pt"))
-        self.subject_idxs = torch.load(os.path.join(data_dir, f"{split}_subject_idxs.pt"))
+        self.X = self.load_data(os.path.join(data_dir, f"{split}_X"))
+        self.subject_idxs = self.load_data(os.path.join(data_dir, f"{split}_subject_idxs"))
         
         if split in ["train", "val"]:
-            self.y = torch.load(os.path.join(data_dir, f"{split}_y.pt"))
-            assert len(torch.unique(self.y)) == self.num_classes, "Number of classes do not match."
+            self.y = self.load_data(os.path.join(data_dir, f"{split}_Y"))
+            assert len(torch.unique(torch.tensor(self.y))) == self.num_classes, "Number of classes do not match."
         
         # MFCC変換器の初期化
         self.mfcc_transform = transforms.MFCC(
@@ -26,6 +26,11 @@ class ThingsMEGDataset(torch.utils.data.Dataset):
             n_mfcc=13,  # MFCCの次元数
             melkwargs={"n_fft": 400, "hop_length": 160, "n_mels": 23, "center": False}
         )
+
+    def load_data(self, dir_path: str) -> torch.Tensor:
+        files = sorted(os.listdir(dir_path))
+        data = [np.load(os.path.join(dir_path, file)) for file in files]
+        return torch.tensor(np.concatenate(data, axis=0))
 
     def __len__(self) -> int:
         return len(self.X)
