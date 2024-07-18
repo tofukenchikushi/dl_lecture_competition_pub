@@ -8,11 +8,11 @@ from omegaconf import DictConfig
 import wandb
 from termcolor import cprint
 from tqdm import tqdm
+import torchaudio
 
 from src.datasets import ThingsMEGDataset
 from src.models import BasicConvClassifier
 from src.utils import set_seed
-
 
 @hydra.main(version_base=None, config_path="configs", config_name="config")
 def run(args: DictConfig):
@@ -25,7 +25,7 @@ def run(args: DictConfig):
     # ------------------
     #    Dataloader
     # ------------------
-    loader_args = {"batch_size": args.batch_size, "num_workers": args.num_workers}
+    loader_args = {"batch_size": args.batch_size, "num_workers": args.num_workers, "pin_memory": True}
     
     train_set = ThingsMEGDataset("train", args.data_dir)
     train_loader = torch.utils.data.DataLoader(train_set, shuffle=True, **loader_args)
@@ -111,7 +111,6 @@ def run(args: DictConfig):
     preds = torch.cat(preds, dim=0).numpy()
     np.save(os.path.join(logdir, "submission"), preds)
     cprint(f"Submission {preds.shape} saved at {logdir}", "cyan")
-
 
 if __name__ == "__main__":
     run()

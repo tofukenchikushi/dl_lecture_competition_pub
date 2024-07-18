@@ -13,7 +13,6 @@ from src.datasets import ThingsMEGDataset
 from src.models import BasicConvClassifier
 from src.utils import set_seed
 
-
 @torch.no_grad()
 @hydra.main(version_base=None, config_path="configs", config_name="config")
 def run(args: DictConfig):
@@ -25,7 +24,7 @@ def run(args: DictConfig):
     # ------------------    
     test_set = ThingsMEGDataset("test", args.data_dir)
     test_loader = torch.utils.data.DataLoader(
-        test_set, shuffle=False, batch_size=args.batch_size, num_workers=args.num_workers
+        test_set, shuffle=False, batch_size=args.batch_size, num_workers=args.num_workers, pin_memory=True
     )
 
     # ------------------
